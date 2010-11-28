@@ -1,0 +1,264 @@
+edulix@edulix-laptop ~/proyectos $ mkdir gittest/
+edulix@edulix-laptop ~/proyectos $ cd gittest/
+edulix@edulix-laptop ~/proyectos/gittest $ git init .
+Initialized empty Git repository in /media/home/edulix/proyectos/gittest/.git/
+edulix@edulix-laptop ~/proyectos/gittest $ echo bar >> foo  
+edulix@edulix-laptop ~/proyectos/gittest $ git add foo
+edulix@edulix-laptop ~/proyectos/gittest $ git ci -m "Initial commit"
+[master (root-commit) c0e8949] Initial commit
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+ create mode 100644 foo
+edulix@edulix-laptop ~/proyectos/gittest!master $ git log | cat
+commit c0e89490100243b79f7dfa1da818926f5820c72a
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:19:42 2010 +0100
+
+    Initial commit
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack       
+usage: git timetrack command [options]
+
+    -s, --start             start/continue counting time spent
+    -p, --stop              stop/pause counting time spent
+    -r, --reset             reset counting time spent
+    -e, --set <minutes>     set time spent in minutes
+    -c, --current           time spent currently in next commit
+    -a, --amend [<object>]  set currently spent time to last commit or to the given one
+    -d, --delete [<object>] delete time-spent to last commit or to the given one
+    -u, --summary [<opts>]  show summary of total time spent. takes similar options as git log
+    addhook                 adds post-commit hook to the project
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack addhook
+hook created
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --set 2
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --current
+time spent in next commit: 2 minutes
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --summary
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          0 seconds
+
+total time spent in this project                   0 seconds
+time spent in next comit                           2 minutes
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --amend # forgot to set time spent in last commit, fixing
+edulix@edulix-laptop ~/proyectos/gittest!master $ git log | cat   
+commit c0e89490100243b79f7dfa1da818926f5820c72a
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:19:42 2010 +0100
+
+    Initial commit
+
+Notes:
+    Time-spent: 120
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --summary
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          2 minutes
+
+total time spent in this project                   2 minutes
+time spent in next comit                           0 seconds
+edulix@edulix-laptop ~/proyectos/gittest!master $ git co -b feature1 
+Switched to a new branch 'feature1'
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --start
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ echo bar >> foo
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ echo bar >> foo
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --current
+time spent in next commit: 11 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --current
+time spent in next commit: 12 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --stop   # because i.e. I'm going to have lunch for example
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --current # ..and when I come back
+time spent in next commit: 32 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --current
+time spent in next commit: 32 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --summary
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          2 minutes
+
+total time spent in this project                   2 minutes
+time spent in next comit                           32 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --start # continue working
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --current
+time spent in next commit: 36 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --current
+time spent in next commit: 37 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ echo bar >> foo
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git ci -a -m "working in feature1"
+[feature1 13bd671] working in feature1
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --summary
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          2 minutes 59 seconds
+
+total time spent in this project                   2 minutes 59 seconds
+time spent in next comit                           0 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git log | cat
+commit 13bd671bb40bb3deb78fd9a692b274aaadab9402
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:25:13 2010 +0100
+
+    working in feature1
+
+Notes:
+    Time-spent: 59
+
+commit c0e89490100243b79f7dfa1da818926f5820c72a
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:19:42 2010 +0100
+
+    Initial commit
+
+Notes:
+    Time-spent: 120
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --summary feature1 # summary accepts similar options as git log
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          2 minutes 59 seconds
+
+total time spent in this project                   2 minutes 59 seconds
+time spent in next comit                           0 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --summary master  
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          2 minutes
+
+total time spent in this project                   2 minutes
+time spent in next comit                           0 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git timetrack --summary
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          2 minutes 59 seconds
+
+total time spent in this project                   2 minutes 59 seconds
+time spent in next comit                           0 seconds
+edulix@edulix-laptop ~/proyectos/gittest!feature1 $ git co master
+Switched to branch 'master'
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --summary 
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          2 minutes
+
+total time spent in this project                   2 minutes
+time spent in next comit                           0 seconds
+edulix@edulix-laptop ~/proyectos/gittest!master $ echo another file > newfile
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --set 2 # ups, forgot to do start, never mind
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --current
+time spent in next commit: 2 minutes
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --start # continues
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --current
+time spent in next commit: 2 minutes 3 seconds
+edulix@edulix-laptop ~/proyectos/gittest!master $ echo working >> newfile
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --current
+time spent in next commit: 2 minutes 11 seconds
+edulix@edulix-laptop ~/proyectos/gittest!master $ git add newfile
+edulix@edulix-laptop ~/proyectos/gittest!master $ git ci -m "continuing work in master"
+[master e600a68] continuing work in master
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+ create mode 100644 newfile
+edulix@edulix-laptop ~/proyectos/gittest!master $ git log | cat
+commit e600a6875eb399ed13ee5e2a180dd4b1180b32ec
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:27:22 2010 +0100
+
+    continuing work in master
+
+Notes:
+    Time-spent: 155
+
+commit c0e89490100243b79f7dfa1da818926f5820c72a
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:19:42 2010 +0100
+
+    Initial commit
+
+Notes:
+    Time-spent: 120
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --summary # time spent in master
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          4 minutes 35 seconds
+
+total time spent in this project                   4 minutes 35 seconds
+time spent in next comit                           0 seconds
+edulix@edulix-laptop ~/proyectos/gittest!master $ git merge feature1
+Merge made by recursive.
+ foo |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+edulix@edulix-laptop ~/proyectos/gittest!master $ git log | cat # after the merge, git log is larger
+commit 78c4b50d200a2105b0866cf85e93e7f8807e21fe
+Merge: e600a68 13bd671
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:27:51 2010 +0100
+
+    Merge branch 'feature1'
+
+commit e600a6875eb399ed13ee5e2a180dd4b1180b32ec
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:27:22 2010 +0100
+
+    continuing work in master
+
+Notes:
+    Time-spent: 155
+
+commit 13bd671bb40bb3deb78fd9a692b274aaadab9402
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:25:13 2010 +0100
+
+    working in feature1
+
+Notes:
+    Time-spent: 59
+
+commit c0e89490100243b79f7dfa1da818926f5820c72a
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:19:42 2010 +0100
+
+    Initial commit
+
+Notes:
+    Time-spent: 120
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --summary # and time has been merged too
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          5 minutes 34 seconds
+
+total time spent in this project                   5 minutes 34 seconds
+time spent in next comit                           0 seconds
+edulix@edulix-laptop ~/proyectos/gittest!master $ echo working again >> newfile          
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --current
+There's no time information :(
+edulix@edulix-laptop ~/proyectos/gittest!master $ git ci -a -m "working again"
+[master cff778d] working again
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+edulix@edulix-laptop ~/proyectos/gittest!master $ git log -2 | cat # as you can see, I forgot to set time spent in last two commits
+commit cff778d9aa9baf88996566576431e76daccc4b94
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:29:32 2010 +0100
+
+    working again
+
+commit 78c4b50d200a2105b0866cf85e93e7f8807e21fe
+Merge: e600a68 13bd671
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:27:51 2010 +0100
+
+    Merge branch 'feature1'
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --set 5 # giving an estimation of time-spent in last commit
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --amend # and amending the last commit
+edulix@edulix-laptop ~/proyectos/gittest!master $ git log -2 | cat # it's been amended as you can see
+commit cff778d9aa9baf88996566576431e76daccc4b94
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:29:32 2010 +0100
+
+    working again
+
+Notes:
+    Time-spent: 300
+
+commit 78c4b50d200a2105b0866cf85e93e7f8807e21fe
+Merge: e600a68 13bd671
+Author: Eduardo Robles Elvira <edulix@gmail.com>
+Date:   Sun Nov 28 12:27:51 2010 +0100
+
+    Merge branch 'feature1'
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --set 1 # setting here the estimated time spent on the merge reviewing the branch etc
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --amend 78c4b50d200a2105b0866cf85e93e7f8807e21fe # and amending the merge commit
+edulix@edulix-laptop ~/proyectos/gittest!master $ git timetrack --summary
+total time spent by authors
+ Eduardo Robles Elvira <edulix@gmail.com>          11 minutes 34 seconds
+
+total time spent in this project                   11 minutes 34 seconds
+time spent in next comit                           0 seconds
+edulix@edulix-laptop ~/proyectos/gittest!master $ 
+
