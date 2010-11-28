@@ -228,6 +228,19 @@ fi' > $githook
 
         echo "git timetrack configured, now, run git pull if you don't want problems"
         ;;
+
+    --pull)
+        git branch -t timetracker refs/notes/timetracker
+        git fetch origin refs/notes/timetracker:refs/notes/timetracker2
+        git checkout timetracker
+        git merge refs/notes/timetracker2
+        git checkout master
+        git update-ref refs/notes/timetracker refs/heads/timetracker
+
+        git branch -D timetracker
+        git update-ref -d refs/notes/timetrack2
+        ;;
+
     *)
         show_help
         ;;
