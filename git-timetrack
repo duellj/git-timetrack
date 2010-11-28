@@ -1,0 +1,139 @@
+#!/bin/bash
+
+
+function show_help {
+    echo "usage: git timetrack command [options]"
+    echo ""
+    echo "    -s, --start           start/continue counting time spent"
+    echo "    -p, --stop            stop/pause counting time spent"
+    echo "    -r, --reset           reset counting time spent"
+    echo "    -e, --set             set time spent in minutes"
+    echo "    -c, --current         time spent currently in next commit"
+    echo "    -u, --summary         show summary of total time spent"
+}
+
+function human_time() {
+    s=$1
+    if [ -z $s ]; then s=0; fi
+    m=0
+    while [ $s -ge 60 ]
+    do
+        m=$(( $m + $s / 60 ))
+        s=$(( $s % 60 ))
+    done
+    h=0
+    while [ $m -ge 60 ]
+    do
+        h=$(( $h + $m / 60 ))
+        m=$(( $m % 60 ))
+    done
+
+    str=""
+    if [ $h -ne 0 ]; then str=$str" $h hours"; fi
+    if [ $m -ne 0 ]; then str=$str" $m minutes"; fi
+    if [ -z "$str" ]
+    then
+        str=$str" $s seconds"
+    else
+        if [ $s -ne 0 ]; then str=$str" $s seconds"; fi
+    fi
+
+    echo $str
+}
+
+function current_time() {
+    start_date=$(git config --local --get timetrack.start)
+    current_date=$(date +%s)
+    spent_date=$(git config --local --get timetrack.spent)
+    if [ -z $spent_date ]; then spent_date=0; fi
+
+    if [ $start_date ]
+    then
+        spent=$(( $spent_date + $current_date - $start_date ))
+    else
+        if [ $spent_date -gt 0 ]
+        then
+            spent=$spent_date
+        fi
+    fi
+
+    echo $spent
+}
+
+function user_time_dedication() {
+    user=$1
+    alltimes=$(git log --author="$user" | grep TIME-SPENT | cut -d":" -f2)
+
+    total=0
+    for t in $alltimes
+    do
+        total=$(( $total + $t ))
+    done
+
+    echo $total
+}
+
+case $1 in
+    -s|--start)
+        git config --local timetrack.start $(date +%s)
+        ;;
+
+    -p|--stop)
+        start_date=$(git config --local --get timetrack.start)
+        current_date=$(date +%s)
+        spent_date=$(git config --local --get timetrack.spent)
+        if [ -z $spent_date ]; then spent_date=0; fi
+
+        if [ $start_date ]
+        then
+            spent=$(( $spent_date + $current_date - $start_date ))
+            git config --local --remove-section timetrack
+            git config --local timetrack.spent $spent
+        else
+            echo "Stop before start? I don't think so."
+        fi
+        ;;
+
+    -c|--current)
+        spent=$(current_time)
+        if [ -z $spent ]
+        then
+            echo "There's no time information :("
+        else
+            echo "time spent in next commit: $(human_time $spent)"
+        fi
+        ;;
+
+    -r|--reset)
+        git config --local --remove-section timetrack
+        ;;
+
+    -e|--set)
+        git config --local --remove-section timetrack
+        git config --local timetrack.spent $(( $2 * 60 ))
+        ;;
+
+    -u|--summary)
+        allusers=$(git log --oneline --pretty="format: %an <%ae>" | uniq)
+        alltimes=$(git log | grep TIME-SPENT | cut -d":" -f2)
+        total=0
+        for t in $alltimes
+        do
+            total=$(( $total + $t ))
+        done
+
+        echo "total time spent by authors"
+        printf "$allusers\n" | while read author
+        do
+            printf " %-49s %s\n" "$author" "$(human_time $(user_time_dedication $author))"
+        done
+        echo
+
+        printf "%-50s %s\n" "total time spent in this project" "$(human_time $total)"
+        printf "%-50s %s\n" "time spent in next comit" "$(human_time $(current_time))"
+        ;;
+
+    *)
+        show_help
+        ;;
+esac

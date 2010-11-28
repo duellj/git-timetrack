@@ -1,0 +1,11 @@
+#!/bin/bash
+
+git timetrack -p > /dev/null
+spent=$(git config --local timetrack.spent)
+git config --local --remove-section timetrack 2> /dev/null
+
+if [ $spent ]
+then
+    echo >> $1
+    echo "TIME-SPENT:$spent" >> $1
+fi
