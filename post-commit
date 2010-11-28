@@ -6,6 +6,5 @@ git config --local --remove-section timetrack 2> /dev/null
 
 if [ $spent ]
 then
-    echo >> $1
-    echo "TIME-SPENT:$spent" >> $1
+    git notes add -m "Time-spent: $spent"
 fi
