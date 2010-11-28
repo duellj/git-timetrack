@@ -11,6 +11,7 @@ function show_help {
     echo "usage: git timetrack command [options]"
     echo ""
     echo "    -s, --start             start/continue counting time spent"
+    echo "    -k, --start-hacking     start/continue counting time spent, won't stop (only reset) on commit"
     echo "    -p, --stop              stop/pause counting time spent"
     echo "    -r, --reset             reset counting time spent"
     echo "    -e, --set <minutes>     set time spent in minutes"
@@ -89,6 +90,11 @@ case $1 in
         git config --local timetrack.start $(date +%s)
         ;;
 
+    -k|--start-hacking)
+        git config --local timetrack.start $(date +%s)
+        git config --local timetrack.hacking "true"
+        ;;
+
     -p|--stop)
         start_date=$(git config --local --get timetrack.start)
         current_date=$(date +%s)
@@ -112,6 +118,11 @@ case $1 in
             echo "There's no time information :("
         else
             echo "time spent in next commit: $(human_time $spent)"
+            hacking=$(git config --local --get timetrack.hacking)
+            if [ $hacking ]
+            then
+                echo "hacking mode activated"
+            fi
         fi
         ;;
 
@@ -127,11 +138,17 @@ case $1 in
     -a|--amend)
         git timetrack -p > /dev/null
         spent=$(git config --local timetrack.spent)
+        hacking=$(git config --local --get timetrack.hacking)
         git config --local --remove-section timetrack 2> /dev/null
 
         if [ $spent ]
         then
             git notes add -f -m "Time-spent: $spent" $2
+        fi
+        if [ $hacking ]
+        then
+            git config --local timetrack.start $(date +%s)
+            git config --local timetrack.hacking $hacking
         fi
         ;;
 
@@ -158,6 +175,12 @@ case $1 in
 
         printf "\n%-50s %s\n" "total time spent in this project" "$(human_time $total)"
         printf "%-50s %s\n" "time spent in next comit" "$(human_time $(current_time))"
+
+        hacking=$(git config --local --get timetrack.hacking)
+        if [ $hacking ]
+        then
+            echo "hacking mode activated"
+        fi
         ;;
 
     addhook)
@@ -165,16 +188,25 @@ case $1 in
         if [ -d $gitdir ]
         then
             githook="$gitdir/post-commit"
-            echo '#!/bin/bash' > $githook
-            echo >> $githook
-            echo 'git timetrack -p > /dev/null' >> $githook
-            echo 'spent=$(git config --local timetrack.spent)' >> $githook
-            echo 'git config --local --remove-section timetrack 2> /dev/null' >> $githook
-            echo >> $githook
-            echo 'if [ $spent ]' >> $githook
-            echo 'then' >> $githook
-            echo '    git notes add -m "Time-spent: $spent"' >> $githook
-            echo 'fi' >> $githook
+
+            echo '#!/bin/bash
+
+hacking=$(git config --local timetrack.hacking)
+git timetrack -p > /dev/null
+spent=$(git config --local timetrack.spent)
+git config --local --remove-section timetrack 2> /dev/null
+
+if [ $spent ]
+then
+    git notes add -m "Time-spent: $spent"
+
+    if [ $hacking ]
+    then
+        git config --local timetrack.start $(date +%s)
+        git config --local timetrack.hacking $hacking
+    fi
+fi' > $githook
+
             chmod +x $githook
             echo "hook created"
         else
