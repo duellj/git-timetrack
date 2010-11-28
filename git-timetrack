@@ -10,6 +10,7 @@ function show_help {
     echo "    -e, --set             set time spent in minutes"
     echo "    -c, --current         time spent currently in next commit"
     echo "    -u, --summary         show summary of total time spent"
+    echo "    addhook               adds commit-msg hook to the project"
 }
 
 function human_time() {
@@ -131,6 +132,29 @@ case $1 in
 
         printf "%-50s %s\n" "total time spent in this project" "$(human_time $total)"
         printf "%-50s %s\n" "time spent in next comit" "$(human_time $(current_time))"
+        ;;
+
+    addhook)
+        gitdir=".git/hooks"
+        if [ -d $gitdir ]
+        then
+            githook="$gitdir/commit-msg"
+            echo '#!/bin/bash' > $githook
+            echo >> $githook
+            echo 'git timetrack -p > /dev/null' >> $githook
+            echo 'spent=$(git config --local timetrack.spent)' >> $githook
+            echo 'git config --local --remove-section timetrack 2> /dev/null' >> $githook
+            echo >> $githook
+            echo 'if [ $spent ]' >> $githook
+            echo 'then' >> $githook
+            echo '    echo >> $1' >> $githook
+            echo '    echo "TIME-SPENT:$spent" >> $1' >> $githook
+            echo 'fi' >> $githook
+            chmod +x $githook
+            echo "hook created"
+        else
+            echo "That isn't a git root directory. I wont do anything"
+        fi
         ;;
 
     *)
