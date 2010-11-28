@@ -7,7 +7,7 @@ git config --local --remove-section timetrack 2> /dev/null
 
 if [ $spent ]
 then
-    git notes add -m "Time-spent: $spent"
+    git notes --ref timetracker add -m "Time-spent: $spent"
 
     if [ $hacking ]
     then

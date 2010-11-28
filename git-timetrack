@@ -7,6 +7,7 @@
 # GNU General Public License version 3 or any later version, incorporated
 # herein by reference.
 
+export GIT_NOTES_DISPLAY_REF="refs/notes/timetracker"
 function show_help {
     echo "usage: git timetrack command [options]"
     echo ""
@@ -143,7 +144,7 @@ case $1 in
 
         if [ $spent ]
         then
-            git notes add -f -m "Time-spent: $spent" $2
+            git notes --ref timetracker add -f -m "Time-spent: $spent" $2
         fi
         if [ $hacking ]
         then
@@ -153,12 +154,12 @@ case $1 in
         ;;
 
     -d|--delete)
-        git notes remove $2
+        git notes --ref timetracker remove $2
         ;;
 
     -u|--summary)
         shift
-        allusers=$(git log $* --oneline --pretty="format: %an <%ae>" | uniq)
+        allusers=$(git log $* --oneline --pretty="format: %an <%ae>" | sort | uniq)
         alltimes=$(git log $* | grep "Time-spent:"  | cut -d":" -f2)
 
         total=0
@@ -198,7 +199,7 @@ git config --local --remove-section timetrack 2> /dev/null
 
 if [ $spent ]
 then
-    git notes add -m "Time-spent: $spent"
+    git notes --ref timetracker add -m "Time-spent: $spent"
 
     if [ $hacking ]
     then
@@ -221,8 +222,8 @@ fi' > $githook
             remote=origin
         fi
 
-        git config --local --add remote.$remote.fetch "refs/notes/*:refs/notes/*"
-        git config --local --add remote.$remote.push "refs/notes/*:refs/notes/*"
+        git config --local --add remote.$remote.fetch "refs/notes/timetracker:refs/notes/timetracker"
+        git config --local --add remote.$remote.push "refs/notes/timetracker:refs/notes/timetracker"
         git config --local --add remote.$remote.push "refs/heads/*:refs/heads/*"
 
         echo "git timetrack configured, now, run git pull if you don't want problems"
