@@ -133,7 +133,7 @@ case $1 in
 
     -u|--summary)
         allusers=$(git log --oneline --pretty="format: %an <%ae>" | uniq)
-        alltimes=$(git notes list | cut -d" " -f1 | xargs git show | grep "^Time-spent:"  | cut -d":" -f2)
+        alltimes=$(git log | grep "Time-spent:"  | cut -d":" -f2)
 
         total=0
         for t in $alltimes
