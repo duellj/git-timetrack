@@ -19,6 +19,7 @@ function show_help {
     echo "    -d, --delete [<object>] delete time-spent to last commit or to the given one"
     echo "    -u, --summary [<opts>]  show summary of total time spent. takes similar options as git log"
     echo "    addhook                 adds post-commit hook to the project"
+    echo "    config [<remote>]       adds config to the project to pull and push timetrack info"
 }
 
 function human_time() {
@@ -181,6 +182,19 @@ case $1 in
         fi
         ;;
 
+    config)
+        remote=$2
+        if [ -z $remote ]
+        then
+            remote=origin
+        fi
+
+        git config --local --add remote.$remote.fetch "refs/notes/*:refs/notes/*"
+        git config --local --add remote.$remote.push "refs/notes/*:refs/notes/*"
+        git config --local --add remote.$remote.push "refs/heads/*:refs/heads/*"
+
+        echo "git timetrack configured, now, run git pull if you don't want problems"
+        ;;
     *)
         show_help
         ;;
