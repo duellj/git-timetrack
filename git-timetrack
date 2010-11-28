@@ -11,7 +11,7 @@ function show_help {
     echo "    -c, --current           time spent currently in next commit"
     echo "    -a, --amend [<object>]  set currently spent time to last commit or to the given one"
     echo "    -d, --delete [<object>] delete time-spent to last commit or to the given one"
-    echo "    -u, --summary           show summary of total time spent"
+    echo "    -u, --summary [<opts>]  show summary of total time spent. takes similar options as git log"
     echo "    addhook                 adds post-commit hook to the project"
 }
 
@@ -65,7 +65,8 @@ function current_time() {
 
 function user_time_dedication() {
     user=$1
-    alltimes=$(git log --author="$user" | grep "Time-spent: " | cut -d":" -f2)
+    shift
+    alltimes=$(git log $* --author="$user" | grep "Time-spent: " | cut -d":" -f2)
 
     total=0
     for t in $alltimes
@@ -132,8 +133,9 @@ case $1 in
         ;;
 
     -u|--summary)
-        allusers=$(git log --oneline --pretty="format: %an <%ae>" | uniq)
-        alltimes=$(git log | grep "Time-spent:"  | cut -d":" -f2)
+        shift
+        allusers=$(git log $* --oneline --pretty="format: %an <%ae>" | uniq)
+        alltimes=$(git log $* | grep "Time-spent:"  | cut -d":" -f2)
 
         total=0
         for t in $alltimes
@@ -144,11 +146,10 @@ case $1 in
         echo "total time spent by authors"
         printf "$allusers\n" | while read author
         do
-            printf " %-49s %s\n" "$author" "$(human_time $(user_time_dedication $author))"
+            printf " %-49s %s\n" "$author" "$(human_time $(user_time_dedication "$author" $*))"
         done
-        echo
 
-        printf "%-50s %s\n" "total time spent in this project" "$(human_time $total)"
+        printf "\n%-50s %s\n" "total time spent in this project" "$(human_time $total)"
         printf "%-50s %s\n" "time spent in next comit" "$(human_time $(current_time))"
         ;;
 
