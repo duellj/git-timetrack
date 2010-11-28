@@ -20,9 +20,9 @@ function show_help {
     echo "    -a, --amend [<object>]  set currently spent time to last commit or to the given one"
     echo "    -d, --delete [<object>] delete time-spent to last commit or to the given one"
     echo "    -u, --summary [<opts>]  show summary of total time spent. takes similar options as git log"
-    echo "    addhooks                adds post-commit hook and post-merge to the project"
-    echo "    config [<remote>]       adds config to the project to pull and push timetrack info"
-    echo "    --init                  setup timetrack environment, hooks and config for origin"
+    echo "    -o, --addhooks          adds post-commit hook and post-merge to the project"
+    echo "    -n, --config [<remote>] adds config to the project to pull and push timetrack info"
+    echo "    -i, --init              setup timetrack environment, hooks and config for origin"
 }
 
 function human_time() {
@@ -229,7 +229,7 @@ git update-ref -d refs/notes/timetracker2' > $gitdir/post-merge
         fi
         ;;
 
-    config)
+    -n|--config)
         remote=$2
         if [ -z $remote ]
         then
@@ -243,9 +243,9 @@ git update-ref -d refs/notes/timetracker2' > $gitdir/post-merge
         echo "git timetrack configured, now, run git pull if you don't want problems"
         ;;
 
-    --init)
-        git timetrack addhooks
-        git timetrack config
+    -i|--init)
+        git timetrack --addhooks
+        git timetrack --config
         ;;
     *)
         show_help
