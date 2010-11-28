@@ -1,0 +1,15 @@
+#!bin/bash
+
+# To append timetrack command to your git installation you should place
+# git-timetrack file in your git-core lib directory.
+#
+# For example in a normal linux distro:
+#
+# $ sudo cp git-timetrack /usr/lib/git-core/
+
+# To use it you should add the commit-msg hook to your project. You
+# can do it running timetrack addhook inside your project dir.
+#
+# $ git timetrack addhook
+
+cp git-timetrack /usr/lib/git-core/
