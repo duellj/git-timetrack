@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Copyright (C) 2010 Daniel Garcia Moreno <dani@danigm.net>
+# Copyright (C) 2010 Eduardo Robles Elvira <edulix@wadobo.com>
+#
+# This software may be used and distributed according to the terms of the
+# GNU General Public License version 3 or any later version, incorporated
+# herein by reference.
 
 function show_help {
     echo "usage: git timetrack command [options]"
