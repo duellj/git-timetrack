@@ -22,7 +22,7 @@ function show_help {
     echo "    -u, --summary [<opts>]  show summary of total time spent. takes similar options as git log"
     echo "    addhooks                adds post-commit hook and post-merge to the project"
     echo "    config [<remote>]       adds config to the project to pull and push timetrack info"
-    echo "    --init                  setup timetrack environment, hooks and config"
+    echo "    --init                  setup timetrack environment, hooks and config for origin"
 }
 
 function human_time() {
