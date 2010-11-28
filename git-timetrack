@@ -20,8 +20,9 @@ function show_help {
     echo "    -a, --amend [<object>]  set currently spent time to last commit or to the given one"
     echo "    -d, --delete [<object>] delete time-spent to last commit or to the given one"
     echo "    -u, --summary [<opts>]  show summary of total time spent. takes similar options as git log"
-    echo "    addhook                 adds post-commit hook to the project"
+    echo "    addhooks                adds post-commit hook and post-merge to the project"
     echo "    config [<remote>]       adds config to the project to pull and push timetrack info"
+    echo "    --init                  setup timetrack environment, hooks and config"
 }
 
 function human_time() {
@@ -184,7 +185,7 @@ case $1 in
         fi
         ;;
 
-    addhook)
+    addhooks)
         gitdir=".git/hooks"
         if [ -d $gitdir ]
         then
@@ -208,6 +209,19 @@ then
     fi
 fi' > $githook
 
+            echo '#!/bin/bash
+
+git branch -t timetracker refs/notes/timetracker
+git fetch origin refs/notes/timetracker:refs/notes/timetracker2
+git checkout timetracker
+git merge refs/notes/timetracker2
+git checkout master
+git update-ref refs/notes/timetracker refs/heads/timetracker
+
+git branch -D timetracker
+git update-ref -d refs/notes/timetracker2' > $gitdir/post-merge
+
+            chmod +x $gitdir/post-merge
             chmod +x $githook
             echo "hook created"
         else
@@ -224,24 +238,15 @@ fi' > $githook
 
         git config --local --add remote.$remote.push "refs/notes/timetracker:refs/notes/timetracker"
         git config --local --add remote.$remote.push "refs/heads/master:refs/heads/master"
+        git config --local notes.rewriteRef "refs/notes/timetracker"
 
         echo "git timetrack configured, now, run git pull if you don't want problems"
         ;;
 
-    --pull)
-        remote="origin"
-        [ $2 ] && remote=$2
-        git branch -t timetracker refs/notes/timetracker
-        git fetch $remote refs/notes/timetracker:refs/notes/timetracker2
-        git checkout timetracker
-        git merge refs/notes/timetracker2
-        git checkout master
-        git update-ref refs/notes/timetracker refs/heads/timetracker
-
-        git branch -D timetracker
-        git update-ref -d refs/notes/timetracker2
+    --init)
+        git timetrack addhooks
+        git timetrack config
         ;;
-
     *)
         show_help
         ;;
