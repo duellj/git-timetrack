@@ -222,23 +222,24 @@ fi' > $githook
             remote=origin
         fi
 
-        git config --local --add remote.$remote.fetch "refs/notes/timetracker:refs/notes/timetracker"
         git config --local --add remote.$remote.push "refs/notes/timetracker:refs/notes/timetracker"
-        git config --local --add remote.$remote.push "refs/heads/*:refs/heads/*"
+        git config --local --add remote.$remote.push "refs/heads/master:refs/heads/master"
 
         echo "git timetrack configured, now, run git pull if you don't want problems"
         ;;
 
     --pull)
+        remote="origin"
+        [ $2 ] && remote=$2
         git branch -t timetracker refs/notes/timetracker
-        git fetch origin refs/notes/timetracker:refs/notes/timetracker2
+        git fetch $remote refs/notes/timetracker:refs/notes/timetracker2
         git checkout timetracker
         git merge refs/notes/timetracker2
         git checkout master
         git update-ref refs/notes/timetracker refs/heads/timetracker
 
         git branch -D timetracker
-        git update-ref -d refs/notes/timetrack2
+        git update-ref -d refs/notes/timetracker2
         ;;
 
     *)
