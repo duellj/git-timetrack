@@ -185,7 +185,7 @@ case $1 in
         fi
         ;;
 
-    addhooks)
+    -o|--addhooks)
         gitdir=".git/hooks"
         if [ -d $gitdir ]
         then
