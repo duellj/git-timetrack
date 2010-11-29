@@ -55,9 +55,9 @@ function human_time() {
 }
 
 function current_time() {
-    start_date=$(git config --local --get timetrack.start)
+    start_date=$(git config --get timetrack.start)
     current_date=$(date +%s)
-    spent_date=$(git config --local --get timetrack.spent)
+    spent_date=$(git config --get timetrack.spent)
     if [ -z $spent_date ]; then spent_date=0; fi
 
     if [ $start_date ]
@@ -89,25 +89,25 @@ function user_time_dedication() {
 
 case $1 in
     -s|--start)
-        git config --local timetrack.start $(date +%s)
+        git config timetrack.start $(date +%s)
         ;;
 
     -k|--start-hacking)
-        git config --local timetrack.start $(date +%s)
-        git config --local timetrack.hacking "true"
+        git config timetrack.start $(date +%s)
+        git config timetrack.hacking "true"
         ;;
 
     -p|--stop)
-        start_date=$(git config --local --get timetrack.start)
+        start_date=$(git config --get timetrack.start)
         current_date=$(date +%s)
-        spent_date=$(git config --local --get timetrack.spent)
+        spent_date=$(git config --get timetrack.spent)
         if [ -z $spent_date ]; then spent_date=0; fi
 
         if [ $start_date ]
         then
             spent=$(( $spent_date + $current_date - $start_date ))
-            git config --local --remove-section timetrack 2>/dev/null
-            git config --local timetrack.spent $spent
+            git config --remove-section timetrack 2>/dev/null
+            git config timetrack.spent $spent
         else
             echo "Stop before start? I don't think so."
         fi
@@ -120,7 +120,7 @@ case $1 in
             echo "There's no time information :("
         else
             echo "time spent in next commit: $(human_time $spent)"
-            hacking=$(git config --local --get timetrack.hacking)
+            hacking=$(git config --get timetrack.hacking)
             if [ $hacking ]
             then
                 echo "hacking mode activated"
@@ -129,19 +129,19 @@ case $1 in
         ;;
 
     -r|--reset)
-        git config --local --remove-section timetrack 2>/dev/null
+        git config --remove-section timetrack 2>/dev/null
         ;;
 
     -e|--set)
-        git config --local --remove-section timetrack 2>/dev/null
-        git config --local timetrack.spent $(( $2 * 60 ))
+        git config --remove-section timetrack 2>/dev/null
+        git config timetrack.spent $(( $2 * 60 ))
         ;;
 
     -a|--amend)
         git timetrack -p > /dev/null
-        spent=$(git config --local timetrack.spent)
-        hacking=$(git config --local --get timetrack.hacking)
-        git config --local --remove-section timetrack 2> /dev/null
+        spent=$(git config timetrack.spent)
+        hacking=$(git config --get timetrack.hacking)
+        git config --remove-section timetrack 2> /dev/null
 
         if [ $spent ]
         then
@@ -149,8 +149,8 @@ case $1 in
         fi
         if [ $hacking ]
         then
-            git config --local timetrack.start $(date +%s)
-            git config --local timetrack.hacking $hacking
+            git config timetrack.start $(date +%s)
+            git config timetrack.hacking $hacking
         fi
         ;;
 
@@ -178,7 +178,7 @@ case $1 in
         printf "\n%-50s %s\n" "total time spent in this project" "$(human_time $total)"
         printf "%-50s %s\n" "time spent in next comit" "$(human_time $(current_time))"
 
-        hacking=$(git config --local --get timetrack.hacking)
+        hacking=$(git config --get timetrack.hacking)
         if [ $hacking ]
         then
             echo "hacking mode activated"
@@ -193,10 +193,10 @@ case $1 in
 
             echo '#!/bin/bash
 
-hacking=$(git config --local timetrack.hacking)
+hacking=$(git config timetrack.hacking)
 git timetrack -p > /dev/null
-spent=$(git config --local timetrack.spent)
-git config --local --remove-section timetrack 2> /dev/null
+spent=$(git config timetrack.spent)
+git config --remove-section timetrack 2> /dev/null
 
 if [ $spent ]
 then
@@ -204,8 +204,8 @@ then
 
     if [ $hacking ]
     then
-        git config --local timetrack.start $(date +%s)
-        git config --local timetrack.hacking $hacking
+        git config timetrack.start $(date +%s)
+        git config timetrack.hacking $hacking
     fi
 fi' > $githook
 
@@ -236,9 +236,9 @@ git update-ref -d refs/notes/timetracker2' > $gitdir/post-merge
             remote=origin
         fi
 
-        git config --local --add remote.$remote.push "refs/notes/timetracker:refs/notes/timetracker"
-        git config --local --add remote.$remote.push "refs/heads/master:refs/heads/master"
-        git config --local notes.rewriteRef "refs/notes/timetracker"
+        git config --add remote.$remote.push "refs/notes/timetracker:refs/notes/timetracker"
+        git config --add remote.$remote.push "refs/heads/master:refs/heads/master"
+        git config notes.rewriteRef "refs/notes/timetracker"
 
         echo "git timetrack configured, now, run git pull if you don't want problems"
         ;;
