@@ -239,6 +239,7 @@ git update-ref -d refs/notes/timetracker2' > $gitdir/post-merge
         git config --add remote.$remote.push "refs/notes/timetracker:refs/notes/timetracker"
         git config --add remote.$remote.push "refs/heads/master:refs/heads/master"
         git config notes.rewriteRef "refs/notes/timetracker"
+        git config notes.displayRef "refs/notes/timetracker"
 
         echo "git timetrack configured, now, run git pull if you don't want problems"
         ;;
