@@ -172,7 +172,8 @@ case $1 in
         echo "total time spent by authors"
         printf "$allusers\n" | while read author
         do
-            printf " %-49s %s\n" "$author" "$(human_time $(user_time_dedication "$author" $*))"
+            dedication="$(human_time $(user_time_dedication "$author" $*))"
+            [ "$dedication" ] && printf " %-49s %s\n" "$author" "$dedication"
         done
 
         printf "\n%-50s %s\n" "total time spent in this project" "$(human_time $total)"
