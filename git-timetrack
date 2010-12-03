@@ -187,7 +187,8 @@ case $1 in
         ;;
 
     -o|--addhooks)
-        gitdir=".git/hooks"
+
+        gitdir="$(git rev-parse --git-dir)/hooks"
         if [ -d $gitdir ]
         then
             githook="$gitdir/post-commit"
@@ -210,21 +211,21 @@ then
     fi
 fi' > $githook
 
+            chmod +x $githook
+
+            githook="$gitdir/post-merge"
+
             echo '#!/bin/bash
 
-git branch -t timetracker refs/notes/timetracker
-git fetch origin refs/notes/timetracker:refs/notes/timetracker2
-git checkout timetracker
-git merge refs/notes/timetracker2
-git checkout master
-git update-ref refs/notes/timetracker refs/heads/timetracker
+GITDIR=$(git rev-parse --git-dir)
+for remote in $GITDIR/refs/notes/remotes/*
+do
+    remote_ref="refs/notes/remotes/$(basename $remote)/timetracker"
+    git notes --ref timetracker merge $remote_ref
+done' > $githook
 
-git branch -D timetracker
-git update-ref -d refs/notes/timetracker2' > $gitdir/post-merge
-
-            chmod +x $gitdir/post-merge
             chmod +x $githook
-            echo "hook created"
+            echo "hooks created"
         else
             echo "That isn't a git root directory. I wont do anything"
         fi
@@ -239,6 +240,7 @@ git update-ref -d refs/notes/timetracker2' > $gitdir/post-merge
 
         git config --add remote.$remote.push "refs/notes/timetracker:refs/notes/timetracker"
         git config --add remote.$remote.push "refs/heads/master:refs/heads/master"
+        git config --add remote.$remote.fetch "+refs/notes/timetracker:refs/notes/remotes/$remote/timetracker"
         git config notes.rewriteRef "refs/notes/timetracker"
         git config notes.displayRef "refs/notes/timetracker"
 
