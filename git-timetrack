@@ -76,7 +76,7 @@ function current_time() {
 function user_time_dedication() {
     user=$1
     shift
-    alltimes=$(git log $* --author="$user" | grep "Time-spent: " | cut -d":" -f2)
+    alltimes=$(git log --author="$user" $* | grep "Time-spent: " | cut -d":" -f2)
 
     total=0
     for t in $alltimes
@@ -160,7 +160,7 @@ case $1 in
 
     -u|--summary)
         shift
-        allusers=$(git log $* --oneline --pretty="format: %an <%ae>" | sort | uniq)
+        allusers=$(git log --oneline --pretty="format: %an <%ae>" $* | sort | uniq)
         alltimes=$(git log $* | grep "Time-spent:"  | cut -d":" -f2)
 
         total=0
@@ -172,8 +172,8 @@ case $1 in
         echo "total time spent by authors"
         printf "$allusers\n" | while read author
         do
-            dedication="$(human_time $(user_time_dedication "$author" $*))"
-            [ "$dedication" ] && printf " %-49s %s\n" "$author" "$dedication"
+            dedication=$(user_time_dedication "$author" $*)
+            [ $dedication -ne 0 ] && printf " %-49s %s\n" "$author" "$(human_time $dedication)"
         done
 
         printf "\n%-50s %s\n" "total time spent in this project" "$(human_time $total)"
