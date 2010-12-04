@@ -20,6 +20,7 @@ function show_help {
     echo "    -a, --amend [<object>]  set currently spent time to last commit or to the given one"
     echo "    -d, --delete [<object>] delete time-spent to last commit or to the given one"
     echo "    -u, --summary [<opts>]  show summary of total time spent. takes similar options as git log"
+    echo "    -l, --log [<opts>]      show git log with notes translates to human time"
     echo "    -o, --addhooks          adds post-commit hook and post-merge to the project"
     echo "    -n, --config [<remote>] adds config to the project to pull and push timetrack info"
     echo "    -i, --init              setup timetrack environment, hooks and config for origin"
@@ -184,6 +185,15 @@ case $1 in
         then
             echo "hacking mode activated"
         fi
+        ;;
+
+    -l|--log)
+        shift
+        git log --color $* | sed "s/Time-spent: \([0-9]\+\)/git timetrack --human-time \1/e" | less -R
+        ;;
+
+    --human-time)
+        echo "    Time-spent: "$(human_time $2)
         ;;
 
     -o|--addhooks)
