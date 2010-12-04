@@ -24,6 +24,7 @@ function show_help {
     echo "    -o, --addhooks          adds post-commit hook and post-merge to the project"
     echo "    -n, --config [<remote>] adds config to the project to pull and push timetrack info"
     echo "    -i, --init              setup timetrack environment, hooks and config for origin"
+    echo "    -m, --merge [<remote>]  merge timetracker notes from remote branch (origin by default)"
 }
 
 function human_time() {
@@ -230,8 +231,7 @@ fi' > $githook
 GITDIR=$(git rev-parse --git-dir)
 for remote in $GITDIR/refs/notes/remotes/*
 do
-    remote_ref="refs/notes/remotes/$(basename $remote)/timetracker"
-    git notes --ref timetracker merge $remote_ref
+    git timetrack --merge "$(basename $remote)"
 done' > $githook
 
             chmod +x $githook
@@ -260,6 +260,16 @@ done' > $githook
     -i|--init)
         git timetrack --addhooks
         git timetrack --config
+        ;;
+    -m|--merge)
+        remote=$2
+        if [ -z $remote ]
+        then
+            remote=origin
+        fi
+
+        remote_ref="refs/notes/remotes/$remote/timetracker"
+        git notes --ref timetracker merge $remote_ref
         ;;
     *)
         show_help
