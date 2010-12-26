@@ -11,17 +11,29 @@ export GIT_NOTES_DISPLAY_REF="refs/notes/timetracker"
 function show_help {
     echo "usage: git timetrack command [options]"
     echo ""
+    echo "Current timer commands:"
     echo "    -s, --start             start/continue counting time spent"
     echo "    -k, --start-hacking     start/continue counting time spent, won't stop (only reset) on commit"
     echo "    -p, --stop              stop/pause counting time spent"
-    echo "    -g  --add <[-]minutes>  add (or substract) time from the timer"
     echo "    -r, --reset             reset counting time spent"
+    echo "    -g  --add <[-]minutes>  add (or substract) time from the timer"
     echo "    -e, --set <minutes>     set time spent in minutes"
     echo "    -c, --current           time spent currently in next commit"
+    echo ""
+    echo "Commit related commands:"
     echo "    -a, --amend [<object>]  set currently spent time to last commit or to the given one"
     echo "    -d, --delete [<object>] delete time-spent to last commit or to the given one"
     echo "    -u, --summary [<opts>]  show summary of total time spent. takes similar options as git log"
     echo "    -l, --log [<opts>]      show git log with notes translates to human time"
+    echo ""
+    echo "Multiple timers commands:"
+    echo "    -st  --save-timer <name> save current timer to a named timer for later reuse"
+    echo "    -ut, --use-timer <name>  sets an existent timer as current one"
+    echo "    -dt, --del-timer <name>  delete an existent timer"
+    echo "    -ti, --timer-info <name> shows a timer information"
+    echo "    -lt, --list-timers       list existing timers"
+    echo ""
+    echo "Configuration commands:"
     echo "    -o, --addhooks          adds post-commit hook and post-merge to the project"
     echo "    -n, --config [<remote>] adds config to the project to pull and push timetrack info"
     echo "    -i, --init              setup timetrack environment, hooks and config for origin"
@@ -143,6 +155,44 @@ case $1 in
         spent_date=$(git config --get timetrack.spent)
         if [ -z $spent_date ]; then spent_date=0; fi
         git config timetrack.spent $(( $2 * 60 + $spent_date ))
+        ;;
+
+    -st|--save-timer)
+        spent=$(current_time)
+        git config timetrack.$2.spent $spent
+        ;;
+
+    -ut|--use-timer)
+        spent=$(git config timetrack.$2.spent)
+        [ -z $spent ] && echo "timer $2 not found" && exit 1
+        git config --remove-section timetrack 2>/dev/null
+        git config timetrack.spent $spent
+        ;;
+
+    -dt|--del-timer)
+        spent=$(git config timetrack.$2.spent)
+        [ -z $spent ] && echo "timer $2 not found" && exit 1
+        git config --remove-section timetrack.$2 2>/dev/null
+        git config timetrack.spent $spent
+        ;;
+
+    -ti|---timer-info)
+        spent=$(git config timetrack.$2.spent)
+        [ -z $spent ] && echo "timer $2 not found" && exit 1
+        echo "time spent in $2: $(human_time $spent)"
+        ;;
+
+    -lt|--list-timers)
+        timers=$(git config -l | grep '^timetrack\..*\.' | cut -d . -f 2 | sort -u)
+        count=0
+        echo "Saved timers:"
+        for i in $timers
+        do
+            count=$[ $count + 1 ]
+            spent=$(git config timetrack.$i.spent)
+            printf " %-25s %s\n" "$i" "$(human_time $spent)"
+        done
+        printf "\n%s timers\n" "$count"
         ;;
 
     -a|--amend)
