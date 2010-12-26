@@ -14,6 +14,7 @@ function show_help {
     echo "    -s, --start             start/continue counting time spent"
     echo "    -k, --start-hacking     start/continue counting time spent, won't stop (only reset) on commit"
     echo "    -p, --stop              stop/pause counting time spent"
+    echo "    -g  --add <[-]minutes>  add (or substract) time from the timer"
     echo "    -r, --reset             reset counting time spent"
     echo "    -e, --set <minutes>     set time spent in minutes"
     echo "    -c, --current           time spent currently in next commit"
@@ -123,10 +124,9 @@ case $1 in
         else
             echo "time spent in next commit: $(human_time $spent)"
             hacking=$(git config --get timetrack.hacking)
-            if [ $hacking ]
-            then
-                echo "hacking mode activated"
-            fi
+            start_date=$(git config --get timetrack.start)
+            [ $start_date ] && echo "timer counting" || echo "timer stopped"
+            [ $hacking ] && echo "hacking mode activated"
         fi
         ;;
 
@@ -137,6 +137,12 @@ case $1 in
     -e|--set)
         git config --remove-section timetrack 2>/dev/null
         git config timetrack.spent $(( $2 * 60 ))
+        ;;
+
+    -g|--add)
+        spent_date=$(git config --get timetrack.spent)
+        if [ -z $spent_date ]; then spent_date=0; fi
+        git config timetrack.spent $(( $2 * 60 + $spent_date ))
         ;;
 
     -a|--amend)
