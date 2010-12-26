@@ -12,32 +12,33 @@ function show_help {
     echo "usage: git timetrack command [options]"
     echo ""
     echo "Current timer commands:"
-    echo "    -s, --start             start/continue counting time spent"
-    echo "    -k, --start-hacking     start/continue counting time spent, won't stop (only reset) on commit"
-    echo "    -p, --stop              stop/pause counting time spent"
-    echo "    -r, --reset             reset counting time spent"
-    echo "    -g  --add <[-]minutes>  add (or substract) time from the timer"
-    echo "    -e, --set <minutes>     set time spent in minutes"
-    echo "    -c, --current           time spent currently in next commit"
+    echo "    -s, --start                start/continue counting time spent"
+    echo "    -k, --start-hacking        start/continue counting time spent, won't stop (only reset) on commit"
+    echo "    -p, --stop                 stop/pause counting time spent"
+    echo "    -r, --reset                reset counting time spent"
+    echo "    -g  --add <[-]minutes>     add (or substract) time from the timer"
+    echo "    -e, --set <minutes>        set time spent in minutes"
+    echo "    -c, --current              time spent currently in next commit"
     echo ""
     echo "Commit related commands:"
-    echo "    -a, --amend [<object>]  set currently spent time to last commit or to the given one"
-    echo "    -d, --delete [<object>] delete time-spent to last commit or to the given one"
-    echo "    -u, --summary [<opts>]  show summary of total time spent. takes similar options as git log"
-    echo "    -l, --log [<opts>]      show git log with notes translates to human time"
+    echo "    -a, --amend [<object>]     set currently spent time to last commit or to the given one"
+    echo "    -d, --delete [<object>]    delete time-spent to last commit or to the given one"
+    echo "    -u, --summary [<opts>]     show summary of total time spent. takes similar options as git    log"
+    echo "    -l, --log [<opts>]         show git log with notes translates to human time"
+    echo "    -gt, --get-time [<object>] gets time from last commit or the given one"
     echo ""
     echo "Multiple timers commands:"
-    echo "    -st  --save-timer <name> save current timer to a named timer for later reuse"
-    echo "    -ut, --use-timer <name>  sets an existent timer as current one"
-    echo "    -dt, --del-timer <name>  delete an existent timer"
-    echo "    -ti, --timer-info <name> shows a timer information"
-    echo "    -lt, --list-timers       list existing timers"
+    echo "    -st  --save-timer <name>   save current timer to a named timer for later reuse"
+    echo "    -ut, --use-timer <name>    sets an existent timer as current one"
+    echo "    -dt, --del-timer <name>    delete an existent timer"
+    echo "    -ti, --timer-info <name>   shows a timer information"
+    echo "    -lt, --list-timers         list existing timers"
     echo ""
     echo "Configuration commands:"
-    echo "    -o, --addhooks          adds post-commit hook and post-merge to the project"
-    echo "    -n, --config [<remote>] adds config to the project to pull and push timetrack info"
-    echo "    -i, --init              setup timetrack environment, hooks and config for origin"
-    echo "    -m, --merge [<remote>]  merge timetracker notes from remote branch (origin by default)"
+    echo "    -o, --addhooks             adds post-commit hook and post-merge to the project"
+    echo "    -n, --config [<remote>]    adds config to the project to pull and push timetrack info"
+    echo "    -i, --init                 setup timetrack environment, hooks and config for origin"
+    echo "    -m, --merge [<remote>]     merge timetracker notes from remote branch (origin by default)"
 }
 
 function human_time() {
@@ -247,6 +248,13 @@ case $1 in
     -l|--log)
         shift
         git log --color $* | sed "s/Time-spent: \([0-9]\+\)/git timetrack --human-time \1/e" | less -R
+        ;;
+
+    -gt|--get-time)
+        time=$(git log $2 -1 | grep "Time-spent:"  | cut -d":" -f2)
+        [ -z $time ] && echo "Error, the specified commit does not have a Time-spent annotation" && exit 1
+        git config --remove-section timetrack 2>/dev/null
+        git config timetrack.spent $time
         ;;
 
     --human-time)
