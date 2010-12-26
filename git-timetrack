@@ -174,7 +174,6 @@ case $1 in
         spent=$(git config timetrack.$2.spent)
         [ -z $spent ] && echo "timer $2 not found" && exit 1
         git config --remove-section timetrack.$2 2>/dev/null
-        git config timetrack.spent $spent
         ;;
 
     -ti|---timer-info)
