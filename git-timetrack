@@ -18,6 +18,7 @@ function show_help {
     echo "    -r, --reset                reset counting time spent"
     echo "    -g  --add <[-]minutes>     add (or substract) time from the timer"
     echo "    -e, --set <minutes>        set time spent in minutes"
+    echo "    -ts, --timesince           set time spent since last commit"
     echo "    -c, --current              time spent currently in next commit"
     echo ""
     echo "Commit related commands:"
@@ -333,6 +334,13 @@ done' > $githook
 
         remote_ref="refs/notes/remotes/$remote/timetracker"
         git notes --ref timetracker merge $remote_ref
+        ;;
+     -ts|--timesince)
+        current_date=$(date +%s)
+        last=$(git log --date=raw -n 1 | grep Date: | sed 's/ \+/ /g' | cut -d " " -f2)
+        t=$(( current_date - last ))
+        git timetrack -s
+        git timetrack -e $(( $t / 60 ))
         ;;
     *)
         show_help
